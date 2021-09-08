@@ -145,6 +145,32 @@
 </div>
 <!-- /.modal -->
 
+<div class="modal fade" id="modal-lg">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Modify/Remove</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="rno">
+        <input type="text" name="replyerMod">
+        <input type="text" name="replyMod">
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-info btnModReply">Modify</button>
+        <button type="button" class="btn btn-danger btnRem">Remove</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
 <%@include file="../includes/footer.jsp"%>
 
 <script>
@@ -194,7 +220,7 @@
                     <span class="direct-chat-name float-left">\${rno} -- \${replyer}</span>
                     <span class="direct-chat-timestamp float-right">\${replyDate}</span>
                   </div>
-                  <div class="direct-chat-text">\${reply}</div>
+                  <div class="direct-chat-text" data-rno='\${rno}' data-replyer='\${replyer}'>\${reply}</div>
                 </div>`
 
         return template;
@@ -237,8 +263,58 @@
       addReply(replyObj).then(result => {
         getList()
         modalDiv.modal('hide')
+        document.querySelector("input[name='replyer']").value = ""
+        document.querySelector("input[name='reply']").value = ""
       })
     }
+  }, false)
+
+  //수정/삭제 dom
+  const modModal = $("#modal-lg")
+  const modReplyer = document.querySelector("input[name='replyerMod']")
+  const modReply = document.querySelector("input[name='replyMod']")
+  const modRno = document.querySelector("input[name='rno']")
+
+  document.querySelector(".direct-chat-messages").addEventListener("click", (e)=> {
+
+    const target = e.target
+    const bno = '${boardDTO.bno}'
+
+    if(target.matches(".direct-chat-text")) {
+      const rno = target.getAttribute("data-rno")
+      const replyer = target.getAttribute("data-replyer")
+      const reply = target.innerHTML
+      console.log(rno, replyer, reply, bno)
+
+      modRno.value = rno
+      modReply.value = reply
+      modReplyer.value = replyer
+
+      document.querySelector(".btnRem").setAttribute("data-rno", rno)
+
+      modModal.modal('show')
+
+
+    }
+  }, false)
+
+  document.querySelector(".btnRem").addEventListener("click", (e) => {
+    const rno = e.target.getAttribute("data-rno")
+    removeReply(rno).then(result => {
+      getList()
+      modModal.modal('hide')
+    })
+
+  },false)
+
+  document.querySelector(".btnModReply").addEventListener("click", (e) => {
+
+    const replyObj = {rno: modRno.value, reply: modReply.value}
+    modifyReply(replyObj).then(result => {
+      getList()
+      modModal.modal('hide')
+    })
+
   }, false)
 
 </script>
