@@ -60,12 +60,38 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
+                        <div class="temp"></div>
                         <!-- /.card-body -->
                         <div class="card-footer">
                             <button type="submit" class="btn btn-warning btnMod">수정</button>
                             <button type="submit" class="btn btn-danger btnDel">삭제</button>
                             <button type="submit" class="btn btn-primary btnList">목록</button>
+                        </div>
+                    </form>
+
+
+                        <label for="exampleInputFile">File input</label>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" name="uploadFiles" class="custom-file-input" id="exampleInputFile" multiple>
+                                <label class="custom-file-label" for="exampleInputFile">Choose file</label>
+                            </div>
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="uploadBtn">Upload</span>
+                            </div>
+                        </div>
+
+                        <div class="uploadResult">
+                            <c:forEach items="${boardDTO.files}" var="attach">
+                                <div data-uuid="${attach.uuid}" data-filename="${attach.fileName}"
+                                     data-uploadpath="${attach.uploadPath}" data-image="${attach.image}">
+                                    <c:if test="${attach.image}">
+                                        <img src="/viewFile?file=${attach.getThumbnail()}">
+                                    </c:if>
+                                        ${attach.fileName}
+                                    <button onclick="javascript:removeDiv(this)">x</button>
+                                </div>
+                            </c:forEach>
                         </div>
 
                     </div>
@@ -104,6 +130,32 @@
         e.preventDefault();
         e.stopPropagation();
 
+        const fileDivArr = uploadResultDiv.querySelectorAll("div")
+        //첨부파일마다 div생성되므로, div의 갯수가 파일의 갯수
+
+        if(fileDivArr && fileDivArr.length > 0) {
+            let str ="";
+            for(let i = 0; i < fileDivArr.length; i++){
+                const target = fileDivArr[i]
+                const uuid = target.getAttribute("data-uuid")
+                const fileName = target.getAttribute("data-filename")
+                const uploadPath = target.getAttribute("data-uploadpath")
+                const image = target.getAttribute("data-image")
+
+                str += `<input type='hidden' name='files[\${i}].uuid' value='\${uuid}' >`
+                str += `<input type='hidden' name='files[\${i}].fileName' value='\${fileName}' >`
+                str += `<input type='hidden' name='files[\${i}].uploadPath' value='\${uploadPath}' >`
+                str += `<input type='hidden' name='files[\${i}].image' value='\${image}' >`
+
+                //4개의 인풋 히든태그 작성. 파일 갯수만큼 반복 생성
+                //폼태그에 삽입해야함
+            }//end for
+
+            document.querySelector(".temp").innerHTML = str
+        }//end if
+
+
+
         form.setAttribute("action", "/board/modify")
         form.setAttribute("method", "post")
         form.submit()
@@ -120,6 +172,56 @@
 
 
 
+</script>
+
+<%--axios스크립트--%>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+
+    const uploadResultDiv = document.querySelector(".uploadResult")
+
+    document.querySelector("#uploadBtn").addEventListener("click",(e) => {
+
+        const formData = new FormData()
+        const fileInput = document.querySelector("input[name='uploadFiles']")
+
+        for(let i = 0; i < fileInput.files.length; i++){
+
+            //console.log(fileInput.files[i])
+
+            formData.append("uploadFiles", fileInput.files[i])
+        }
+        //append의 이름이 파라미터의 이름이 됨. 매우중요
+
+        console.log(formData)
+
+        const headerObj = { headers: {'Content-Type': 'multipart/form-data'}}
+        //헤더객체 생성
+
+        axios.post("/upload", formData, headerObj).then((response) => {
+            const arr = response.data
+            console.log(arr)
+            let str = ""
+            for(let i = 0; i < arr.length; i++){
+                const {uuid,fileName,uploadPath,image,thumbnail,fileLink} = {...arr[i]}
+
+                if(image){//버튼을 추가. 버튼을 클릭하면 파일의 링크 전달
+                    str += `<div data-uuid='\${uuid}' data-filename='\${fileName}' data-uploadpath='\${uploadPath}' data-image='\${image}' ><img src='/viewFile?file=\${thumbnail}'/><span>\${fileName}</span>
+                            <button onclick="javascript:removeDiv(this)" >x</button></div>`
+                }else {
+                    str += `<div data-uuid='\${uuid}'data-filename='\${fileName}' data-uploadpath='\${uploadPath}' data-image='\${image}'><a href='/downFile?file=\${fileLink}'>\${fileName}</a></div>`
+                }
+            }//end for
+            uploadResultDiv.innerHTML += str
+        })
+        //버튼을 누르면 업로드 post방식 호출
+
+    },false)
+
+    function removeDiv(ele){
+        ele.parentElement.remove();
+    }
 </script>
 
 

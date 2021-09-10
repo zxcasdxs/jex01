@@ -83,6 +83,12 @@
             </div>
 
             <div class="uploadResult">
+              <c:forEach items="${boardDTO.files}" var="attach">
+                <div>
+                  ${attach.fileName}
+                  <button onclick="javascript:removeFile('${attach.getFileLink()}')">x</button> <%--삭제 하려면 파일링크 필요--%>
+                </div>
+              </c:forEach>
 
             </div>
 

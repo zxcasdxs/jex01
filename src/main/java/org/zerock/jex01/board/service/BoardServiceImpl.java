@@ -71,6 +71,18 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public Boolean modify(BoardDTO boardDTO) {
-        return boardMapper.update(boardDTO.getDomain()) > 0 ;
+
+        boardMapper.deleteAttach(boardDTO.getBno());
+
+        Board board = boardDTO.getDomain();
+
+        Long bno = board.getBno();
+
+        board.getAttachList().forEach(boardAttach -> {
+            boardAttach.setBno(bno);
+            boardMapper.insertAttach(boardAttach);
+        });
+
+        return boardMapper.update(board) > 0 ;
     }
 }

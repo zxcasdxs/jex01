@@ -92,10 +92,15 @@ public class BoardController {
     @PostMapping("/modify")
     public String modify(BoardDTO boardDTO,PageRequestDTO pageRequestDTO , RedirectAttributes redirectAttributes){
         log.info("c               modify : " + boardDTO);
+        if(boardDTO.getFiles().size() > 0) {
+            boardDTO.getFiles().forEach(dto -> log.info(dto));
+        }
+
         if(boardService.modify(boardDTO)){
             log.info("modify success");
             redirectAttributes.addFlashAttribute("result", "modified");
         }
+
         redirectAttributes.addAttribute("bno", boardDTO.getBno());
         redirectAttributes.addAttribute("page", pageRequestDTO.getPage());
         redirectAttributes.addAttribute("size", pageRequestDTO.getSize());

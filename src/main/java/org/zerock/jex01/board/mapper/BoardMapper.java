@@ -24,4 +24,6 @@ public interface BoardMapper {
     int updateReplyCnt(@Param("bno") Long bno,@Param("num") int num);
 
     int insertAttach(BoardAttach boardAttach);
+
+    int deleteAttach(Long bno);
 }

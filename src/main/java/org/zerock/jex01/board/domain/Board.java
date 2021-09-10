@@ -2,10 +2,12 @@ package org.zerock.jex01.board.domain;
 
 import lombok.*;
 import org.zerock.jex01.board.dto.BoardDTO;
+import org.zerock.jex01.common.dto.UploadResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @ToString
@@ -17,6 +19,7 @@ public class Board {
     private Long bno;
     private String title, content, writer;
     private LocalDateTime regDate, modDate;
+    private int replyCnt;
 
     @Builder.Default
     private List<BoardAttach> attachList = new ArrayList<>();
@@ -31,6 +34,18 @@ public class Board {
                 .modDate(modDate)
                 .build();
 
+        //BoardAttach -> UploadResponseDTO -> List
+        List<UploadResponseDTO> uploadResponseDTOList =  attachList.stream().map(boardAttach -> {
+            UploadResponseDTO uploadResponseDTO = UploadResponseDTO.builder()
+                    .uuid(boardAttach.getUuid())
+                    .fileName(boardAttach.getFileName())
+                    .uploadPath(boardAttach.getPath())
+                    .image(boardAttach.isImage())
+                    .build();
+            return uploadResponseDTO;
+        }).collect(Collectors.toList());
+
+        boardDTO.setFiles(uploadResponseDTOList);
 
 
         return boardDTO;

@@ -24,6 +24,7 @@ public class BoardDTO {
     private String writer;
     private LocalDateTime regDate;
     private LocalDateTime modDate;
+    private int replyCnt;
 
     @Builder.Default//초기화 필요하여 사용
     private List<UploadResponseDTO> files = new ArrayList<>();
