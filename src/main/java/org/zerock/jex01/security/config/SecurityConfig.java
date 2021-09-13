@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.zerock.jex01.security.handler.CustomLoginSuccessHandler;
+import org.zerock.jex01.security.service.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -28,16 +30,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/sample/doMember").access("hasRole('ROLE_MEMBER')")
                 .antMatchers("/sample/doAdmin").access("hasRole('ROLE_ADMIN')");
 
-        http.formLogin();
+        http.formLogin().loginPage("/customLogin").loginProcessingUrl("/login");
+        http.csrf().disable();
 
+    }
+
+    @Bean
+    public CustomLoginSuccessHandler customLoginSuccessHandler() {
+        return new CustomLoginSuccessHandler();
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        auth.inMemoryAuthentication().withUser("member1").password("$2a$10$xTFFWIDBh8PXAqR3vlagmODlN/rPxXDkZo67MPDtXAMRQUAPMVFPK")
-                .roles("MEMBER");
-        auth.inMemoryAuthentication().withUser("admin1").password("$2a$10$xTFFWIDBh8PXAqR3vlagmODlN/rPxXDkZo67MPDtXAMRQUAPMVFPK")
-                .roles("MEMBER","ADMIN");
+        auth.userDetailsService(customUserDetailsService());
+
+//        auth.inMemoryAuthentication().withUser("member1").password("$2a$10$xTFFWIDBh8PXAqR3vlagmODlN/rPxXDkZo67MPDtXAMRQUAPMVFPK")
+//                .roles("MEMBER");
+//        auth.inMemoryAuthentication().withUser("admin1").password("$2a$10$xTFFWIDBh8PXAqR3vlagmODlN/rPxXDkZo67MPDtXAMRQUAPMVFPK")
+//                .roles("MEMBER","ADMIN");
+    }
+
+    @Bean
+    public CustomUserDetailsService customUserDetailsService() {
+        return new CustomUserDetailsService();
     }
 }
