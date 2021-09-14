@@ -9,6 +9,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.zerock.jex01.common.config.RootConfig;
 import org.zerock.jex01.security.config.SecurityConfig;
+import org.zerock.jex01.security.domain.Member;
+import org.zerock.jex01.security.mapper.MemberMapper;
 
 @Log4j2
 @ExtendWith(SpringExtension.class)
@@ -17,6 +19,20 @@ public class PasswordTests {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired(required = false)
+    MemberMapper memberMapper;
+
+    @Test
+    public void testMember() {
+        String mid = "admin0";
+
+        Member member = memberMapper.findByMid(mid);
+
+        log.warn("------------------------------------");
+        log.warn(member);
+
+    }
 
     @Test
     public void testEncode() {
@@ -80,5 +96,37 @@ public class PasswordTests {
             System.out.println(result);
 
         }
+    }
+
+    @Test
+    public void insertMemberRole() {
+
+        String sql = "insert into tbl_member_role (mid, role) values ('%s', '%s');";
+
+        for(int i = 0; i < 10; i ++) {
+
+            String result = String.format(sql, "user" + i, "ROLE_MEMBER");
+
+            System.out.println(result);
+
+        }//end for
+    }
+
+    @Test
+    public void insertAdminRole() {
+
+        String sql = "insert into tbl_member_role (mid, role) values ('%s', '%s');";
+
+        for(int i = 0; i < 10; i ++) {
+
+            String result = String.format(sql, "admin" + i, "ROLE_MEMBER");
+
+            System.out.println(result);
+
+            String result2 = String.format(sql, "admin" + i, "ROLE_ADMIN");
+
+            System.out.println(result2);
+
+        }//end for
     }
 }

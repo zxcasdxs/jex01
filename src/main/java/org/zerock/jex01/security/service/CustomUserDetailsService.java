@@ -1,13 +1,23 @@
 package org.zerock.jex01.security.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.zerock.jex01.security.domain.Member;
+import org.zerock.jex01.security.mapper.MemberMapper;
+
+import java.util.stream.Collectors;
 
 @Log4j2
+@RequiredArgsConstructor
+@Service
 public class CustomUserDetailsService implements UserDetailsService {
+
+    private final MemberMapper memberMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -16,16 +26,27 @@ public class CustomUserDetailsService implements UserDetailsService {
         log.warn("CustomUserDetailsService----------------------------");
         log.warn("CustomUserDetailsService----------------------------");
         log.warn(username);
+        log.warn(memberMapper);
         log.warn("CustomUserDetailsService----------------------------");
         log.warn("CustomUserDetailsService----------------------------");
         log.warn("CustomUserDetailsService----------------------------");
 
+        Member member = memberMapper.findByMid(username);
+
+        log.warn(member);
+
+        if(member == null) {
+            throw new UsernameNotFoundException("NOT EXIST");
+        }
+
+        String[] authorities = member.getRoleList().stream().map(memberRole -> memberRole.getRole()).toArray(String[]::new);
+
         User result = (User) User.builder()
                 .username(username)
-                .password("$2a$10$xTFFWIDBh8PXAqR3vlagmODlN/rPxXDkZo67MPDtXAMRQUAPMVFPK")
+                .password(member.getMpw())
                 .accountExpired(false)
                 .accountLocked(false)
-                .authorities("ROLE_MEMBER", "ROLE_ADMIN")
+                .authorities(authorities)
                 .build();
 
         return result;

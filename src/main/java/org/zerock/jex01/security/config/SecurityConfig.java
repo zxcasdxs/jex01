@@ -1,7 +1,10 @@
 package org.zerock.jex01.security.config;
 
 import lombok.extern.log4j.Log4j2;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,13 +12,26 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.zerock.jex01.security.handler.CustomLoginSuccessHandler;
 import org.zerock.jex01.security.service.CustomUserDetailsService;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableWebSecurity
 @Log4j2
+@MapperScan(basePackages = "org.zerock.jex01.security.mapper")
+@ComponentScan(basePackages = "org.zerock.jex01.security.service" )
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private DataSource dataSource;
+
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -33,6 +49,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.formLogin().loginPage("/customLogin").loginProcessingUrl("/login");
         http.csrf().disable();
 
+        http.rememberMe().tokenRepository(persistentTokenRepository())
+                .key("zerock").tokenValiditySeconds(60*60*24*30);
+
     }
 
     @Bean
@@ -43,7 +62,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        auth.userDetailsService(customUserDetailsService());
+        auth.userDetailsService(customUserDetailsService);
+
+//        auth.userDetailsService(customUserDetailsService());
 
 //        auth.inMemoryAuthentication().withUser("member1").password("$2a$10$xTFFWIDBh8PXAqR3vlagmODlN/rPxXDkZo67MPDtXAMRQUAPMVFPK")
 //                .roles("MEMBER");
@@ -51,8 +72,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .roles("MEMBER","ADMIN");
     }
 
+//    @Bean
+//    public CustomUserDetailsService customUserDetailsService() {
+//        return new CustomUserDetailsService();
+//    }
+
     @Bean
-    public CustomUserDetailsService customUserDetailsService() {
-        return new CustomUserDetailsService();
+    public PersistentTokenRepository persistentTokenRepository() {
+        JdbcTokenRepositoryImpl repository = new JdbcTokenRepositoryImpl();
+        repository.setDataSource(dataSource);
+        return repository;
     }
 }
