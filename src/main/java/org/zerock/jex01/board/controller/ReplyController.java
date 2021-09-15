@@ -2,6 +2,7 @@ package org.zerock.jex01.board.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.jex01.board.dto.ReplyDTO;
 import org.zerock.jex01.board.service.ReplyService;
@@ -27,6 +28,7 @@ public class ReplyController {
         return new String[]{"AAA", "BBB", "CCC"};
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("")
     public int add(@RequestBody ReplyDTO replyDTO) {
 

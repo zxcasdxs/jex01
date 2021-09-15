@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.zerock.jex01.security.handler.CustomAccessDeniedHandler;
 import org.zerock.jex01.security.handler.CustomLoginSuccessHandler;
 import org.zerock.jex01.security.service.CustomUserDetailsService;
 
@@ -41,10 +42,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        http.authorizeRequests()
-                .antMatchers("/sample/doAll").permitAll()
-                .antMatchers("/sample/doMember").access("hasRole('ROLE_MEMBER')")
-                .antMatchers("/sample/doAdmin").access("hasRole('ROLE_ADMIN')");
+//        http.authorizeRequests()
+//                .antMatchers("/sample/doAll").permitAll()
+//                .antMatchers("/sample/doMember").access("hasRole('ROLE_MEMBER')")
+//                .antMatchers("/sample/doAdmin").access("hasRole('ROLE_ADMIN')");
 
         http.formLogin().loginPage("/customLogin").loginProcessingUrl("/login");
         http.csrf().disable();
@@ -52,6 +53,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.rememberMe().tokenRepository(persistentTokenRepository())
                 .key("zerock").tokenValiditySeconds(60*60*24*30);
 
+        http.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler());
+
+    }
+
+    @Bean
+    public CustomAccessDeniedHandler customAccessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
     }
 
     @Bean

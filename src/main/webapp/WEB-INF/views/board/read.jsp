@@ -1,6 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@include file="../includes/header.jsp"%>
 
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
   <!-- Content Header (Page header) -->
@@ -60,7 +62,11 @@
             <!-- /.card-body -->
             <div class="card-footer">
               <button type="button" class="btn btn-default btnList">LIST</button>
+              <sec:authentication property="principal" var="memberDTO" />
+
+              <c:if test="${boardDTO.writer  eq  memberDTO.mid }">
               <button type="button" class="btn btn-info btnMod">MODIFY</button>
+              </c:if>
             </div>
 
             <div>
@@ -142,7 +148,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <input type="text" name="replyer">
+        <input type="text" name="replyer" readonly value="<sec:authentication property="principal.mid"/>">
         <input type="text" name="reply">
       </div>
       <div class="modal-footer justify-content-between">

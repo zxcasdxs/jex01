@@ -83,13 +83,13 @@
 
                         <div class="uploadResult">
                             <c:forEach items="${boardDTO.files}" var="attach">
+                                <c:if test="${attach.image}">
                                 <div data-uuid="${attach.uuid}" data-filename="${attach.fileName}"
                                      data-uploadpath="${attach.uploadPath}" data-image="${attach.image}">
-                                    <c:if test="${attach.image}">
                                         <img src="/viewFile?file=${attach.getThumbnail()}">
-                                    </c:if>
                                         ${attach.fileName}
-                                    <button onclick="javascript:removeDiv(this)">x</button>
+                                        <button onclick="javascript:removeDiv(this)">x</button>
+                                </c:if>
                                 </div>
                             </c:forEach>
                         </div>
